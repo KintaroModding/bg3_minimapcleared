@@ -8,6 +8,10 @@ Removes the black grid lines from the minimap, for a clean map view.
 - The change is there for keyboard and mouse and for a controller.
 - Nothing else changes, and there is nothing to set up.
 
+## Screenshots
+
+![The map without grid lines](docs/screen1.jpg)
+
 ## How to install
 
 1. Download `bg3_minimapcleared.pak` from the latest release on GitHub.
