@@ -1,0 +1,3 @@
+* text=auto eol=lf
+# The GUI files keep the Windows line endings of the baseline, so the files in the .pak stay byte-identical.
+*.xaml text eol=crlf

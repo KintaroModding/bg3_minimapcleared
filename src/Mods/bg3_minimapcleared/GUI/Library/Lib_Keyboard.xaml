@@ -1,0 +1,270 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:ls="clr-namespace:ls;assembly=Code" xmlns:System="clr-namespace:System;assembly=mscorlib" xmlns:noesis="clr-namespace:NoesisGUIExtensions;assembly=Noesis.GUI.Extensions">
+    <Style TargetType="ls:LSWorldMap">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ls:LSWorldMap">
+                    <ControlTemplate.Resources>
+                        <System:Int32 x:Key="MinFloor">-100</System:Int32>
+                    </ControlTemplate.Resources>
+                    <Grid x:Name="Root" Background="Black" ClipToBounds="True">
+                        <Grid x:Name="MapHolder" RenderTransformOrigin="0.5,0.5" DataContext="{Binding WorldMapData, RelativeSource={RelativeSource TemplatedParent}}">
+                            <Grid.RenderTransform>
+                                <TransformGroup>
+                                    <TranslateTransform X="{Binding MapPos.X, RelativeSource={RelativeSource TemplatedParent}}" Y="{Binding MapPos.Y, RelativeSource={RelativeSource TemplatedParent}}" />
+                                    <RotateTransform Angle="{Binding MapRotation , RelativeSource={RelativeSource TemplatedParent}}" />
+                                    <ScaleTransform ScaleX="{Binding MapScale, RelativeSource={RelativeSource TemplatedParent}}" ScaleY="{Binding MapScale, RelativeSource={RelativeSource TemplatedParent}}" />
+                                </TransformGroup>
+                            </Grid.RenderTransform>
+                            <Image x:Name="MapImage" Source="{Binding MapImageUri}" Stretch="Uniform" Opacity="0.0" />
+                            <Rectangle x:Name="MapImageVT" Width="{Binding ElementName=MapImage, Path=ActualWidth}" Height="{Binding ElementName=MapImage, Path=ActualHeight}" noesis:Element.PPAAMode="Disabled" Opacity="1.0">
+                                <Rectangle.Fill>
+                                    <ImageBrush ImageSource="{Binding MapImageUri}" Stretch="Uniform">
+                                        <noesis:Brush.Shader>
+                                            <ls:VirtualTextureBrushShader Darken="{Binding Darken}" />
+                                        </noesis:Brush.Shader>
+                                    </ImageBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                            <ItemsControl x:Name="RegionsContainer" ItemsSource="{Binding RegionsContainer.Regions}" Width="{Binding ElementName=MapImage,Path=ActualWidth}" Height="{Binding ElementName=MapImage,Path=ActualHeight}" Opacity="1.0">
+                                <ItemsControl.RenderTransform>
+                                    <TransformGroup>
+                                        <MatrixTransform Matrix="{Binding ProjectionMatrix,RelativeSource={RelativeSource AncestorType=ls:LSWorldMap}}" />
+                                    </TransformGroup>
+                                </ItemsControl.RenderTransform>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="ls:VMRegion">
+                                        <Rectangle x:Name="region" Height="{Binding WorldSize.Y}" Width="{Binding WorldSize.X}" Stretch="Fill" VerticalAlignment="Top" HorizontalAlignment="Left" noesis:Element.PPAAMode="Disabled">
+                                            <Rectangle.RenderTransform>
+                                                <TransformGroup>
+                                                    <TranslateTransform X="{Binding WorldPos.X}" Y="{Binding WorldPos.Y}" />
+                                                </TransformGroup>
+                                            </Rectangle.RenderTransform>
+                                            <Rectangle.Fill>
+                                                <ImageBrush ImageSource="{Binding GUID}" Stretch="Fill">
+                                                    <noesis:Brush.Shader>
+                                                        <ls:VirtualTextureBrushShader Darken="{Binding DataContext.Darken, RelativeSource={RelativeSource AncestorType=ItemsControl}}" />
+                                                    </noesis:Brush.Shader>
+                                                </ImageBrush>
+                                            </Rectangle.Fill>
+                                        </Rectangle>
+                                        <DataTemplate.Triggers>
+                                            <DataTrigger Binding="{Binding Hidden}" Value="True">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <ItemsControl x:Name="CurrentBuilding" ItemsSource="{Binding CurrentBuilding.Floors}" Width="{Binding ElementName=MapImage, Path=ActualWidth}" Height="{Binding ElementName=MapImage, Path=ActualHeight}">
+                                <ItemsControl.RenderTransform>
+                                    <TransformGroup>
+                                        <MatrixTransform Matrix="{Binding ProjectionMatrix,RelativeSource={RelativeSource AncestorType=ls:LSWorldMap}}" />
+                                    </TransformGroup>
+                                </ItemsControl.RenderTransform>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Grid />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="ls:VMFloor">
+                                        <ItemsControl ItemsSource="{Binding Sections}" x:Name="Sections" Visibility="Visible">
+                                            <ItemsControl.ItemsPanel>
+                                                <ItemsPanelTemplate>
+                                                    <Grid />
+                                                </ItemsPanelTemplate>
+                                            </ItemsControl.ItemsPanel>
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="ls:VMFloorSection">
+                                                    <Rectangle x:Name="floorSection" Height="{Binding WorldSize.Y}" Width="{Binding WorldSize.X}" Stretch="Fill" VerticalAlignment="Top" HorizontalAlignment="Left" noesis:Element.PPAAMode="Disabled">
+                                                        <Rectangle.RenderTransform>
+                                                            <TransformGroup>
+                                                                <TranslateTransform X="{Binding WorldPos.X}" Y="{Binding WorldPos.Y}" />
+                                                            </TransformGroup>
+                                                        </Rectangle.RenderTransform>
+                                                        <Rectangle.Fill>
+                                                            <ImageBrush ImageSource="{Binding GUID}" Stretch="Fill">
+                                                                <noesis:Brush.Shader>
+                                                                    <ls:VirtualTextureBrushShader Darken="{Binding DataContext.Darken, RelativeSource={RelativeSource AncestorType={x:Type ItemsControl}}}" />
+                                                                </noesis:Brush.Shader>
+                                                            </ImageBrush>
+                                                        </Rectangle.Fill>
+                                                    </Rectangle>
+                                                    <DataTemplate.Triggers>
+                                                        <DataTrigger Binding="{Binding Hidden}" Value="True">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </DataTemplate.Triggers>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style TargetType="ContentPresenter">
+                                        <Setter Property="Panel.ZIndex" Value="{Binding Floor}" />
+                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Style.Triggers>
+                                            <DataTrigger Value="False">
+                                                <DataTrigger.Binding>
+                                                    <MultiBinding Converter="{StaticResource LessThanOrEqualMultiConverter}">
+                                                        <Binding Path="Floor" />
+                                                        <Binding Path="DataContext.Floor" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                    </MultiBinding>
+                                                </DataTrigger.Binding>
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                            </ItemsControl>
+                            <ItemsControl x:Name="ShroudedRooms" ItemsSource="{Binding Rooms}" Width="{Binding ElementName=MapImage,Path=ActualWidth}" Height="{Binding ElementName=MapImage,Path=ActualHeight}" Opacity="1.0">
+                                <ItemsControl.RenderTransform>
+                                    <TransformGroup>
+                                        <MatrixTransform Matrix="{Binding ProjectionMatrix, RelativeSource={RelativeSource AncestorType=ls:LSWorldMap}}" />
+                                    </TransformGroup>
+                                </ItemsControl.RenderTransform>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="ls:VMRoom">
+                                        <Path Stroke="Black" StrokeThickness="{Binding Border}" Fill="Black" x:Name="Room" Visibility="Collapsed">
+                                            <Path.Data>
+                                                <PathGeometry FillRule="Nonzero" Figures="{Binding Points, Converter={StaticResource PolygonConverter}}" />
+                                            </Path.Data>
+                                        </Path>
+                                        <DataTemplate.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding RoomState}" Value="Shrouded" />
+                                                    <Condition Value="True">
+                                                        <Condition.Binding>
+                                                            <MultiBinding Converter="{StaticResource EqualConverter}">
+                                                                <Binding Path="Floor" />
+                                                                <Binding Path="DataContext.Floor" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                            </MultiBinding>
+                                                        </Condition.Binding>
+                                                    </Condition>
+                                                    <Condition Value="True">
+                                                        <Condition.Binding>
+                                                            <MultiBinding Converter="{StaticResource EqualConverter}">
+                                                                <Binding Path="BuildingUuid" />
+                                                                <Binding Path="DataContext.CurrentBuilding.UuidStr" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                            </MultiBinding>
+                                                        </Condition.Binding>
+                                                    </Condition>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter TargetName="Room" Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding RoomState}" Value="Shrouded" />
+                                                    <Condition Binding="{Binding Floor}" Value="{StaticResource MinFloor}" />
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter TargetName="Room" Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <ItemsControl x:Name="SemiShroudedRooms" ItemsSource="{Binding Rooms}" Width="{Binding ElementName=MapImage,Path=ActualWidth}" Height="{Binding ElementName=MapImage,Path=ActualHeight}" Opacity="0.5">
+                                <ItemsControl.RenderTransform>
+                                    <TransformGroup>
+                                        <MatrixTransform Matrix="{Binding ProjectionMatrix, RelativeSource={RelativeSource AncestorType=ls:LSWorldMap}}" />
+                                    </TransformGroup>
+                                </ItemsControl.RenderTransform>
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate DataType="ls:VMRoom">
+                                        <Path Stroke="Black" StrokeThickness="{Binding Border}" Fill="Black" x:Name="Room" Visibility="Collapsed">
+                                            <Path.Data>
+                                                <PathGeometry FillRule="Nonzero" Figures="{Binding Points, Converter={StaticResource PolygonConverter}}" />
+                                            </Path.Data>
+                                        </Path>
+                                        <DataTemplate.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding RoomState}" Value="SemiShrouded" />
+                                                    <Condition Value="True">
+                                                        <Condition.Binding>
+                                                            <MultiBinding Converter="{StaticResource EqualConverter}">
+                                                                <Binding Path="Floor" />
+                                                                <Binding Path="DataContext.Floor" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                            </MultiBinding>
+                                                        </Condition.Binding>
+                                                    </Condition>
+                                                    <Condition Value="True">
+                                                        <Condition.Binding>
+                                                            <MultiBinding Converter="{StaticResource EqualConverter}">
+                                                                <Binding Path="BuildingUuid" />
+                                                                <Binding Path="DataContext.CurrentBuilding.UuidStr" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                            </MultiBinding>
+                                                        </Condition.Binding>
+                                                    </Condition>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter TargetName="Room" Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding RoomState}" Value="SemiShrouded" />
+                                                    <Condition Binding="{Binding Floor}" Value="{StaticResource MinFloor}" />
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter TargetName="Room" Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger>
+                                        </DataTemplate.Triggers>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <Rectangle x:Name="Shroud" Width="{Binding ElementName=MapImage, Path=ActualWidth}" Height="{Binding ElementName=MapImage, Path=ActualHeight}" noesis:Element.PPAAMode="Disabled" Opacity="0.8">
+                                <Rectangle.Fill>
+                                    <ImageBrush ImageSource="{Binding ShroudImageUri}">
+                                        <noesis:Brush.Shader>
+                                            <ls:ShroudBrushShader WorldSize="{Binding WorldSize}" AiWorldSize="{Binding AiWorldSize}" GridOpacity="0.0" ShroudSubregionMin="{Binding ShroudSubregionMin}" ShroudSubregionMax="{Binding ShroudSubregionMax}" />
+                                        </noesis:Brush.Shader>
+                                        <ImageBrush.RelativeTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="{Binding ShroudScale.X}" ScaleY="{Binding ShroudScale.Y}" />
+                                                <TranslateTransform X="{Binding ShroudPos.X}" Y="{Binding ShroudPos.Y}" />
+                                            </TransformGroup>
+                                        </ImageBrush.RelativeTransform>
+                                    </ImageBrush>
+                                </Rectangle.Fill>
+                            </Rectangle>
+                        </Grid>
+                        <Canvas x:Name="PART_Area" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                        <Canvas x:Name="PART_MarkerHolder" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <DataTrigger Binding="{Binding WorldMapData.IsShroudActive, RelativeSource={RelativeSource Self}}" Value="False">
+                            <Setter TargetName="Shroud" Property="Visibility" Value="Hidden" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding WorldMapData.IsRoomShroudActive, RelativeSource={RelativeSource Self}}" Value="False">
+                            <Setter TargetName="ShroudedRooms" Property="Visibility" Value="Hidden" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding WorldMapData.IsRoomShroudActive, RelativeSource={RelativeSource Self}}" Value="False">
+                            <Setter TargetName="SemiShroudedRooms" Property="Visibility" Value="Hidden" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding WorldMapData.OnRoof, RelativeSource={RelativeSource Self}}" Value="True">
+                            <Setter TargetName="CurrentBuilding" Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ElevationMargin" Value="{Binding DataContext.Data.MapElevationMargin, RelativeSource={RelativeSource AncestorType=ls:UIWidget}}" />
+        <Setter Property="Elevation" Value="{Binding DataContext.CurrentPlayer.WorldMap.CurrentCharacterElevation, RelativeSource={RelativeSource AncestorType=ls:UIWidget}}" />
+        <Setter Property="MarkerTrajectory" Value="Ellipse" />
+    </Style>
+</ResourceDictionary>

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://openmods.nexus/openmods.schema.json",
+  "openmods": 1,
+  "name": "Minimap Cleared",
+  "summary": "Removes the black grid lines from the minimap, for a clean map view.",
+  "games": ["baldurs-gate-3"],
+  "tags": ["ui", "quality-of-life"],
+  "gameVersions": ["Patch 8"]
+}
